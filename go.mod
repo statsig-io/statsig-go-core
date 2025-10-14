@@ -1,3 +1,5 @@
+// version 0.10.2-beta.2510142023
+
 module github.com/statsig-io/statsig-go-core
 
 go 1.22
