@@ -6,7 +6,7 @@ toolchain go1.24.5
 
 require (
 	github.com/ebitengine/purego v0.9.0
-	github.com/statsig-io/go-server-core-binaries-linux-gnu v0.10.2-beta.2510150236
-	github.com/statsig-io/go-server-core-binaries-linux-musl v0.10.2-beta.2510150236
-	github.com/statsig-io/go-server-core-binaries-macos v0.10.2-beta.2510150236
+	github.com/statsig-io/go-server-core-binaries-linux-gnu v0.10.2-beta.2510151849
+	github.com/statsig-io/go-server-core-binaries-linux-musl v0.10.2-beta.2510151849
+	github.com/statsig-io/go-server-core-binaries-macos v0.10.2-beta.2510151849
 )
