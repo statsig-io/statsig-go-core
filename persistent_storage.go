@@ -1,16 +1,15 @@
 package statsig_go_core
 
 import (
-	"C"
-)
-import (
 	"encoding/json"
 	"fmt"
 	"runtime"
+
+	"github.com/statsig-io/statsig-go-core/internal"
 )
 
 type PersistentStorageFunctions struct {
-	Load   func(key string) string
+	Load   func(key string) *UserPersistedValues
 	Save   func(key string, configName string, data StickyValues)
 	Delete func(key string, configName string)
 }
@@ -39,6 +38,8 @@ type StickyValues struct {
 	ConfigVersion                 *int64              `json:"config_version,omitempty"`
 }
 
+type UserPersistedValues map[string]StickyValues
+
 type persistentStorageArgs struct {
 	Key        string        `json:"key"`
 	ConfigName string        `json:"config_name"`
@@ -53,14 +54,29 @@ func NewPersistentStorage(functions PersistentStorageFunctions) *PersistentStora
 
 	storage.ref = GetFFI().persistent_storage_create(
 		// Load
-		func(key *C.char) *C.char {
-			keyStr := C.GoString(key)
-			result := storage.functions.Load(keyStr)
-			return C.CString(result)
+		func(argsPtr *byte, argsLength uint64) *byte {
+			keyStr := internal.GoStringFromPointer(argsPtr, argsLength)
+			if keyStr == nil {
+				return nil
+			}
+
+			result := storage.functions.Load(*keyStr)
+
+			if result == nil {
+				return nil
+			}
+
+			json, err := json.Marshal(*result)
+			if err != nil {
+				fmt.Println("Error marshalling user persisted values", err)
+				return nil
+			}
+
+			return &json[0]
 		},
 		// Save
-		func(args *C.char) {
-			data, err := tryMarshalPersistentStorageArgs(args)
+		func(argsPtr *byte, argsLength uint64) {
+			data, err := tryMarshalPersistentStorageArgs(argsPtr, argsLength)
 			if err != nil {
 				fmt.Println("Error marshalling persistent storage args", err)
 				return
@@ -74,8 +90,8 @@ func NewPersistentStorage(functions PersistentStorageFunctions) *PersistentStora
 			storage.functions.Save(data.Key, data.ConfigName, *data.Data)
 		},
 		// Delete
-		func(args *C.char) {
-			data, err := tryMarshalPersistentStorageArgs(args)
+		func(argsPtr *byte, argsLength uint64) {
+			data, err := tryMarshalPersistentStorageArgs(argsPtr, argsLength)
 			if err != nil {
 				fmt.Println("Error marshalling persistent storage args", err)
 				return
@@ -91,23 +107,15 @@ func NewPersistentStorage(functions PersistentStorageFunctions) *PersistentStora
 	return storage
 }
 
-func (c *PersistentStorage) INTERNAL_testPersistentStorage(action string, key string, configName string, data string) *string {
-	result := GetFFI().__internal__test_persistent_storage(c.ref, action, key, configName, data)
-
-	if result == nil {
-		return nil
-	}
-
-	goString := C.GoString(result)
-	return &goString
-
+func (c *PersistentStorage) INTERNAL_testPersistentStorage(action string, key string, configName string, data string) string {
+	return GetFFI().__internal__test_persistent_storage(c.ref, action, key, configName, data)
 }
 
-func tryMarshalPersistentStorageArgs(input *C.char) (*persistentStorageArgs, error) {
-	data := C.GoString(input)
+func tryMarshalPersistentStorageArgs(inputPtr *byte, inputLength uint64) (*persistentStorageArgs, error) {
+	data := internal.GoStringFromPointer(inputPtr, inputLength)
 
 	var args persistentStorageArgs
-	err := json.Unmarshal([]byte(data), &args)
+	err := json.Unmarshal([]byte(*data), &args)
 	if err != nil {
 		fmt.Println("Error unmarshalling persistent storage args", err)
 		return nil, err
