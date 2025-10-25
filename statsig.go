@@ -103,13 +103,9 @@ func (s *Statsig) GetFeatureGateWithOptions(user *StatsigUser, gateName string, 
 		return gate
 	}
 
-	gateJson := UseRustString(func() (*byte, uint64) {
-		len := uint64(0)
-		ptr := GetFFI().statsig_get_feature_gate_with_inout_len(s.ref.Load(), user.ref, gateName, optionsJson, &len)
-		return ptr, len
-	})
+	gateJson := GetFFI().statsig_get_feature_gate(s.ref.Load(), user.ref, gateName, optionsJson)
 
-	if err := json.Unmarshal([]byte(*gateJson), &gate); err != nil {
+	if err := json.Unmarshal([]byte(gateJson), &gate); err != nil {
 		fmt.Printf("Failed to unmarshal FeatureGate: %v", err)
 	}
 
@@ -131,13 +127,8 @@ func (s *Statsig) GetDynamicConfigWithOptions(user *StatsigUser, configName stri
 		return config
 	}
 
-	configJson := UseRustString(func() (*byte, uint64) {
-		len := uint64(0)
-		ptr := GetFFI().statsig_get_dynamic_config_with_inout_len(s.ref.Load(), user.ref, configName, optionsJson, &len)
-		return ptr, len
-	})
-
-	if err := json.Unmarshal([]byte(*configJson), &config); err != nil {
+	configJson := GetFFI().statsig_get_dynamic_config(s.ref.Load(), user.ref, configName, optionsJson)
+	if err := json.Unmarshal([]byte(configJson), &config); err != nil {
 		fmt.Printf("Failed to unmarshal DynamicConfig: %v", err)
 	}
 
@@ -159,13 +150,8 @@ func (s *Statsig) GetExperimentWithOptions(user *StatsigUser, experimentName str
 		return experiment
 	}
 
-	experimentJson := UseRustString(func() (*byte, uint64) {
-		len := uint64(0)
-		ptr := GetFFI().statsig_get_experiment_with_inout_len(s.ref.Load(), user.ref, experimentName, optionsJson, &len)
-		return ptr, len
-	})
-
-	if err := json.Unmarshal([]byte(*experimentJson), &experiment); err != nil {
+	experimentJson := GetFFI().statsig_get_experiment(s.ref.Load(), user.ref, experimentName, optionsJson)
+	if err := json.Unmarshal([]byte(experimentJson), &experiment); err != nil {
 		fmt.Printf("Failed to unmarshal Experiment: %v", err)
 	}
 
@@ -189,13 +175,8 @@ func (s *Statsig) GetLayerWithOptions(user *StatsigUser, layerName string, optio
 		return layer
 	}
 
-	layerJson := UseRustString(func() (*byte, uint64) {
-		len := uint64(0)
-		ptr := GetFFI().statsig_get_layer_with_inout_len(s.ref.Load(), user.ref, layerName, optionsJson, &len)
-		return ptr, len
-	})
-
-	if err := json.Unmarshal([]byte(*layerJson), &layer); err != nil {
+	layerJson := GetFFI().statsig_get_layer(s.ref.Load(), user.ref, layerName, optionsJson)
+	if err := json.Unmarshal([]byte(layerJson), &layer); err != nil {
 		fmt.Printf("Failed to unmarshal Layer: %v", err)
 	}
 
@@ -214,12 +195,8 @@ func (s *Statsig) GetClientInitResponseWithOptions(user *StatsigUser, options *C
 		return nil
 	}
 
-	return UseRustString(func() (*byte, uint64) {
-		len := uint64(0)
-		ptr := GetFFI().statsig_get_client_init_response_with_inout_len(s.ref.Load(), user.ref, optionsJson, &len)
-		return ptr, len
-	})
-
+	resp := GetFFI().statsig_get_client_init_response(s.ref.Load(), user.ref, optionsJson)
+	return &resp
 }
 
 func (s *Statsig) ManuallyLogFeatureGateExposure(user *StatsigUser, gateName string) {
@@ -237,6 +214,7 @@ func (s *Statsig) ManuallyLogExperimentExposure(user *StatsigUser, experimentNam
 func (s *Statsig) ManuallyLogLayerParamExposure(user *StatsigUser, layerName string, paramName string) {
 	GetFFI().statsig_manually_log_layer_parameter_exposure(s.ref.Load(), user.ref, layerName, paramName)
 }
+
 
 func (s *Statsig) release() {
 	was := s.ref.Swap(0)
