@@ -3,7 +3,6 @@ package statsig_go_core
 import (
 	"encoding/json"
 	"fmt"
-	"runtime"
 )
 
 type StatsigUser struct {
@@ -106,10 +105,6 @@ func (b *StatsigUserBuilder) Build() (*StatsigUser, error) {
 	user := &StatsigUser{
 		ref: userRef,
 	}
-
-	runtime.SetFinalizer(user, func(obj *StatsigUser) {
-		GetFFI().statsig_user_release(obj.ref)
-	})
 
 	return user, nil
 }
