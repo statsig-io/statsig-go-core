@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/ebitengine/purego v0.9.0
-	github.com/statsig-io/go-server-core-binaries-linux-gnu v0.17.3-beta.2603250310
-	github.com/statsig-io/go-server-core-binaries-linux-musl v0.17.3-beta.2603250310
-	github.com/statsig-io/go-server-core-binaries-macos v0.17.3-beta.2603250310
+	github.com/statsig-io/go-server-core-binaries-linux-gnu v0.17.3-rc.2603272156
+	github.com/statsig-io/go-server-core-binaries-linux-musl v0.17.3-rc.2603272156
+	github.com/statsig-io/go-server-core-binaries-macos v0.17.3-rc.2603272156
 )
