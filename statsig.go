@@ -392,11 +392,6 @@ func (s *Statsig) GetParameterStoreList() []string {
 	return s.getEntityList(GetFFI().statsig_get_parameter_store_list)
 }
 
-// GetLayerList returns the names of all configured layers.
-func (s *Statsig) GetLayerList() []string {
-	return s.getEntityList(GetFFI().statsig_get_layer_list)
-}
-
 func (s *Statsig) getEntityList(ffiFn func(uint64, *uint64) *byte) []string {
 	list := []string{}
 

@@ -77,16 +77,3 @@ func TestGetParameterStoreList(t *testing.T) {
 		t.Errorf("Parameter store list should contain 'test_parameter_store', got %v", stores)
 	}
 }
-
-func TestGetLayerList(t *testing.T) {
-	statsig, _, _ := SetupTest(t)
-	defer statsig.Shutdown()
-
-	layers := statsig.GetLayerList()
-	if len(layers) == 0 {
-		t.Errorf("Layer list should not be empty")
-	}
-	if !contains(layers, "test_layer") {
-		t.Errorf("Layer list should contain 'test_layer', got %v", layers)
-	}
-}
